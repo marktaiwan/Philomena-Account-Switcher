@@ -1,0 +1,21 @@
+{
+    "namespace": "https://github.com/marktaiwan/",
+    "homepageURL": "https://github.com/marktaiwan/Philomena-Account-Switcher",
+    "supportURL": "https://github.com/marktaiwan/Philomena-Account-Switcher/issues",
+    "match": [
+        "https://*.ponybooru.org/*",
+        "https://*.ponerpics.com/*",
+        "https://*.ponerpics.org/*",
+        "https://*.derpibooru.org/*",
+        "https://*.trixiebooru.org/*"
+    ],
+    "grant": [
+        "GM_setValue",
+        "GM_getValue"
+    ],
+    "inject-into": "content",
+    "noframes": true,
+    "require": [
+        "https://github.com/marktaiwan/Derpibooru-Unified-Userscript-Ui/raw/master/derpi-four-u.js?v1.2.3"
+    ]
+}
