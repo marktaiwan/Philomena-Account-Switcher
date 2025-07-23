@@ -3,7 +3,7 @@ import {SCRIPT_ID} from '../const';
 
 type maybeArray<T> = T | T[];
 
-function wrapArray<T>(obj: T | Array<T>): Array<T> {
+function wrapArray<T>(obj: T | T[]): T[] {
   return (Array.isArray(obj)) ? obj : [obj];
 }
 

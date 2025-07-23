@@ -236,7 +236,7 @@ function setupConfigUI(configElement: HTMLElement): void {
   );
 
   const buttonSet = create('div');
-  const addButton = createButton( 'Add', [
+  const addButton = createButton('Add', [
     'button--state-success',
     `${SCRIPT_ID}--button--add`,
   ]);
