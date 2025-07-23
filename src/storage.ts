@@ -63,7 +63,7 @@ function setAccount(cred: UserCredential): boolean {
   return true;
 }
 
-function getAccount(key: string): UserCredential {
+function getAccount(key: string): UserCredential | undefined {
   return getStore().find(matchAccount(key));
 }
 

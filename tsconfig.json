@@ -1,8 +1,6 @@
 {
     "compilerOptions": {
         "strict": true,
-        "noImplicitAny": false,
-        "strictNullChecks": false,
         "removeComments": false,
         "target": "esnext",
         "moduleResolution": "node",

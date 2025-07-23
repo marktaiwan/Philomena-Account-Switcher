@@ -167,7 +167,7 @@ function clearInputFields(): void {
   for (const input of inputs) input.value = '';
 }
 
-function renderList(list: HTMLDivElement = $(`.${SCRIPT_ID}--list`)): void {
+function renderList(list: HTMLDivElement | null = $(`.${SCRIPT_ID}--list`)): void {
   if (!list) return;
 
   const frag = new DocumentFragment();
@@ -214,7 +214,7 @@ function renderList(list: HTMLDivElement = $(`.${SCRIPT_ID}--list`)): void {
   list.appendChild(frag);
 }
 
-function setupConfigUI(configElement: HTMLElement): void {
+function setupConfigUI(configElement: HTMLElement | null): void {
   if (configElement === null) return;
   const frag = new DocumentFragment();
 
@@ -242,10 +242,10 @@ function setupConfigUI(configElement: HTMLElement): void {
   ]);
   addButton.addEventListener('click', () => {
     const trimVal = (input: HTMLInputElement): string => input.value.trim();
-    const name = $<HTMLInputElement>(`.${SCRIPT_ID}--input[data-prop="displayname"]`);
-    const email = $<HTMLInputElement>(`.${SCRIPT_ID}--input[data-prop="email"]`);
-    const password = $<HTMLInputElement>(`.${SCRIPT_ID}--input[data-prop="password"]`);
-    const avatar = $<HTMLInputElement>(`.${SCRIPT_ID}--input[data-prop="avatar"]`);
+    const name = $<HTMLInputElement>(`.${SCRIPT_ID}--input[data-prop="displayname"]`)!;
+    const email = $<HTMLInputElement>(`.${SCRIPT_ID}--input[data-prop="email"]`)!;
+    const password = $<HTMLInputElement>(`.${SCRIPT_ID}--input[data-prop="password"]`)!;
+    const avatar = $<HTMLInputElement>(`.${SCRIPT_ID}--input[data-prop="avatar"]`)!;
 
     /**
      * Marking the inputs as 'required' will cause an error when trying to
@@ -308,7 +308,7 @@ function setupConfigUI(configElement: HTMLElement): void {
       target.replaceWith(createDelConfirmButton(key));
     } else if (target.matches('a')
       && target.closest(`.${SCRIPT_ID}--list--confirm`)) {
-      const span = target.parentElement;
+      const span = target.parentElement!;
       if (target.dataset.delConfirm == 'y') {
         deleteAccount(key);
         redraw = true;
@@ -317,7 +317,7 @@ function setupConfigUI(configElement: HTMLElement): void {
         span.replaceWith(createDelButton(key));
       }
     } else if (target.closest(`.${SCRIPT_ID}--reorder a`)) {
-      const direction = target.closest('a').dataset.dir;
+      const direction = target.closest('a')?.dataset.dir;
       if (direction == 'up' || direction == 'down') {
         moveAccount(direction, key);
         redraw = true;
@@ -363,9 +363,9 @@ function displayTwoFactorForm(token: string): void {
 
   wrapper.append(panel);
   document.body.append(wrapper);
-  $('form', panel).addEventListener('submit', twoFactorFormHandler);
+  $('form', panel)!.addEventListener('submit', twoFactorFormHandler);
   (document.activeElement as HTMLElement).blur();
-  $('input#user_twofactor_token', panel).focus();
+  $('input#user_twofactor_token', panel)!.focus();
 }
 
 function applyDropdown(): void {
@@ -377,7 +377,15 @@ function applyDropdown(): void {
   const switcherDropdown = create('div');
   switcherDropdown.classList.add(`${SCRIPT_ID}--dropdown`);
 
-  const header = userDropdownContent.firstElementChild.cloneNode(true) as HTMLAnchorElement;
+  if (!userDropdownContent?.firstElementChild) {
+    console.error(`${NAME}: Filed to acquire user dropdown element`);
+    return;
+  }
+  const header = userDropdownContent.firstElementChild.cloneNode(true);
+  if (!(header instanceof HTMLAnchorElement)) {
+    console.error(`${NAME}: Expected header to be an HTMLAnchorElement, but got: ${header}`);
+    return;
+  }
   header.classList.add(`${SCRIPT_ID}--header`);
   header.innerHTML = `<i class="fa fa-fw fa-arrow-left"></i> ${header.innerText}`;
 
@@ -400,10 +408,16 @@ function applyDropdown(): void {
 
   nav.addEventListener('click', async e => {
     const target = e.target as HTMLElement;
-    const button = target.closest(`.${SCRIPT_ID}--nav a[data-key]`) as HTMLAnchorElement;
-    if (!button) return;
+    const button = target.closest(`.${SCRIPT_ID}--nav a[data-key]`);
+    if (!(button instanceof HTMLAnchorElement)) return;
 
-    const {email, password} = getAccount(button.dataset.key);
+    const account = getAccount(button.dataset.key!);
+    if (!account) {
+      updateButton('Error', button);
+      console.error(`${NAME}: Account credentials not found for key: ${button.dataset.key}`);
+      return;
+    }
+    const {email, password} = account;
     updateButton('Switching...', button);
     try {
       const token = await login(email, password);

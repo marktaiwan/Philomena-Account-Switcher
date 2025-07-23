@@ -12,7 +12,7 @@ function parseHTML(source: string): Document {
   return parser.parseFromString(source, 'text/html');
 }
 
-function getKey(childEl: HTMLElement): string {
+function getKey(childEl: HTMLElement): string | undefined {
   return childEl.closest<HTMLElement>(`.${SCRIPT_ID}--list--row`)?.dataset.key;
 }
 
@@ -44,7 +44,7 @@ function createButton(text: string, classes: maybeArray<string>): HTMLButtonElem
 }
 
 function updateButton(text: string, button: HTMLAnchorElement): void {
-  button.lastChild.remove();
+  button.lastChild?.remove();
   button.append(text);
 }
 

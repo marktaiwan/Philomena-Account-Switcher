@@ -1,12 +1,16 @@
 import {SCRIPT_ID} from './const';
 import {$, parseHTML} from './util';
 
-function getDocumentDatastore(prop: string, doc = document): string {
+function getDocumentDatastore(prop: string, doc = document): string | undefined {
   return $('.js-datastore', doc)?.dataset[prop];
 }
 
 function getCSRFToken(doc = document): string {
-  return $<HTMLMetaElement>('meta[name="csrf-token"]', doc)?.content;
+  const tokenElement = $<HTMLMetaElement>('meta[name="csrf-token"]', doc);
+  if (!tokenElement) {
+    throw new Error('CSRF token meta tag not found in the document');
+  }
+  return tokenElement.content;
 }
 
 function isRequestException(e: unknown): e is requestException {
@@ -46,7 +50,7 @@ async function logout(): Promise<string> {
 /**
  * @returns new CSRF token if 2FA is required
  */
-async function login(email: string, password: string): Promise<string> {
+async function login(email: string, password: string): Promise<string | null | undefined> {
   let token = getCSRFToken();
   if (getDocumentDatastore('userIsSignedIn') == 'true') {
     try {
@@ -92,7 +96,7 @@ async function login(email: string, password: string): Promise<string> {
     const token = await resp
       .text()
       .then(parseHTML)
-      .then(doc => $<HTMLInputElement>('[name="_csrf_token"]', doc).value);
+      .then(doc => $<HTMLInputElement>('[name="_csrf_token"]', doc)?.value);
 
     return token;
   } else {
@@ -106,8 +110,8 @@ function twoFactorFormHandler(e: Event): void {
   const form = e.currentTarget as HTMLFormElement;
   const formData = new FormData(form);
   const body = new URLSearchParams(formData as unknown as string);
-  $<HTMLButtonElement>('button', form).disabled = true;
-  $<HTMLInputElement>('#user_twofactor_token', form).disabled = true;
+  $<HTMLButtonElement>('button', form)!.disabled = true;
+  $<HTMLInputElement>('#user_twofactor_token', form)!.disabled = true;
   fetch(window.origin + '/sessions/totp', {
     method: 'POST',
     mode: 'same-origin',
